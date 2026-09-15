@@ -1,0 +1,6 @@
+.env
+.env.local
+.env.*.local
+dist/
+node_modules/
+.playabl/tmp/

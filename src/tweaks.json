@@ -1,0 +1,43 @@
+{
+  "feedbackDelayMs": {
+    "type": "number",
+    "value": 520,
+    "min": 250,
+    "max": 1000,
+    "step": 10,
+    "name": "Choice Feedback Delay",
+    "description": "Milliseconds before the next prompt appears after a choice.",
+    "group": "pacing",
+    "index": 1
+  },
+  "resultIdleSeconds": {
+    "type": "number",
+    "value": 90,
+    "min": 30,
+    "max": 240,
+    "step": 5,
+    "name": "Result Idle Reset",
+    "description": "Seconds before a completed result returns to attract mode.",
+    "group": "booth",
+    "index": 2
+  },
+  "activeIdleSeconds": {
+    "type": "number",
+    "value": 180,
+    "min": 60,
+    "max": 600,
+    "step": 10,
+    "name": "Active Session Idle Check",
+    "description": "Seconds before an inactive game asks whether the participant is still playing.",
+    "group": "booth",
+    "index": 3
+  },
+  "soundEnabled": {
+    "type": "boolean",
+    "value": true,
+    "name": "Interface Sounds",
+    "description": "Enables quiet synthesized selection and reveal tones.",
+    "group": "audio",
+    "index": 4
+  }
+}
