@@ -1982,3 +1982,63 @@ h2 {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Language switcher (ID default, EN optional) */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  justify-self: end;
+}
+
+.locale-switcher {
+  display: inline-flex;
+  border: 2px solid var(--navy);
+  border-radius: 999px;
+  overflow: hidden;
+  background: white;
+}
+
+.attract-footer .locale-switcher {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+}
+
+.locale-btn {
+  min-width: 44px;
+  min-height: 36px;
+  border: 0;
+  padding: 0.35em 0.8em;
+  background: transparent;
+  color: var(--navy);
+  font-size: clamp(11px, 1.4cqw, 14px);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.attract-footer .locale-btn {
+  color: white;
+}
+
+.locale-btn.is-active {
+  background: var(--navy);
+  color: white;
+}
+
+.attract-footer .locale-btn.is-active {
+  background: var(--lime);
+  color: var(--navy);
+}
+
+.locale-switcher.is-compact .locale-btn {
+  min-width: 40px;
+  min-height: 32px;
+  padding: 0.25em 0.6em;
+}
+
+.attract-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}

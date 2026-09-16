@@ -53,6 +53,15 @@ export const ARCHETYPES = Object.freeze({
 });
 
 export const DIMENSION_LABELS = Object.freeze({
+  builder: "Pembangun",
+  problemSolver: "Pemecah Masalah",
+  explorer: "Penjelajah",
+  designer: "Perancang",
+  guardian: "Penjaga",
+  analyst: "Analis",
+});
+
+export const DIMENSION_LABELS_EN = Object.freeze({
   builder: "Builder",
   problemSolver: "Problem Solver",
   explorer: "Explorer",
@@ -60,6 +69,24 @@ export const DIMENSION_LABELS = Object.freeze({
   guardian: "Guardian",
   analyst: "Analyst",
 });
+
+export const ARCHETYPE_DESCRIPTIONS_EN = Object.freeze({
+  builder: "Your answers show a tendency to turn ideas into things that really work.",
+  problemSolver: "Your answers show a tendency to take problems apart and understand how a system works.",
+  explorer: "Your answers show a tendency to try new possibilities and experiment with emerging technology.",
+  designer: "Your answers show a tendency to make technology feel clear, useful, and delightful for its users.",
+  guardian: "Your answers show a tendency to keep systems safe, reliable, and ready for risk.",
+  analyst: "Your answers show a tendency to find patterns, organize data, and decide in a structured way.",
+});
+
+export function getDimensionLabels(locale) {
+  return locale === "en" ? DIMENSION_LABELS_EN : DIMENSION_LABELS;
+}
+
+export function getArchetypeDescription(key, locale) {
+  if (locale === "en") return ARCHETYPE_DESCRIPTIONS_EN[key] || ARCHETYPES[key]?.description || "";
+  return ARCHETYPES[key]?.description || "";
+}
 
 export function resolveArchetype(rawScores, evidence) {
   return [...DIMENSIONS].sort((a, b) => {

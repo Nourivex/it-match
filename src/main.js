@@ -1,6 +1,7 @@
 import sdk from "@playabl/sdk";
 import assetsManifest from "./assets.json";
 import { createGame } from "./game/game.js";
+import { createTranslator, getInitialLocale } from "./game/i18n.js";
 import tweaksManifest from "./tweaks.json";
 import "./styles.css";
 
@@ -30,10 +31,13 @@ try {
   const game = createGame({ mount: app, sdk, ready, tweaks, assets });
   game.start();
 } catch {
+  const locale = getInitialLocale();
+  const t = createTranslator(locale);
+  document.documentElement.lang = locale;
   app.innerHTML = `
     <section class="startup-recovery" role="alert">
-      <strong>IT TECH MATCH</strong>
-      <p>Sesi perlu dimulai ulang.</p>
-      <button type="button" onclick="location.reload()">MULAI ULANG</button>
+      <strong>${t("startup.title")}</strong>
+      <p>${t("startup.body")}</p>
+      <button type="button" onclick="location.reload()">${t("startup.retry")}</button>
     </section>`;
 }

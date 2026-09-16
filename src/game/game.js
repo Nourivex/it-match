@@ -1,6 +1,7 @@
 import { createLocalAnalytics } from "./analytics.js";
 import { createBoothAudio } from "./audio.js";
-import { fallbackData } from "./data/fallback-data.js";
+import { getLocalizedFallbackData } from "./data/localized-data.js";
+import { createTranslator, getInitialLocale, normalizeLocale, setStoredLocale } from "./i18n.js";
 import { calculateProfile } from "./scoring.js";
 import { createGameState } from "./state.js";
 import { createSupabaseService } from "./supabase/service.js";
@@ -33,7 +34,10 @@ export function createGame({ mount, sdk, tweaks }) {
   const persistence = createSupabaseService();
   const analytics = createLocalAnalytics();
   const audio = createBoothAudio(sdk);
-  let data = fallbackData;
+  let locale = getInitialLocale();
+  let t = createTranslator(locale);
+  let data = getLocalizedFallbackData(locale);
+  let remoteData = null;
   let notice = "";
   let operatorStats = null;
   let operatorRemote = false;
@@ -72,6 +76,21 @@ export function createGame({ mount, sdk, tweaks }) {
     });
   }
 
+  function applyLocale(next, options = {}) {
+    locale = normalizeLocale(next);
+    t = createTranslator(locale);
+    setStoredLocale(locale);
+    try {
+      document.documentElement.lang = locale;
+    } catch {
+      // Non-DOM environment.
+    }
+    // Remote CMS content is treated as Indonesian; English keeps the bundled EN set
+    // so the quiz stays fully translated even when Supabase content loads.
+    data = locale === "en" ? getLocalizedFallbackData("en") : remoteData || getLocalizedFallbackData("id");
+    if (!options.silent) render({ focus: false });
+  }
+
   function render({ focus = true } = {}) {
     mount.innerHTML = renderApp({
       state: store.get(),
@@ -80,6 +99,8 @@ export function createGame({ mount, sdk, tweaks }) {
       operatorStats,
       pendingCount,
       operatorRemote,
+      locale,
+      t,
     });
     if (focus) focusScreen();
     scheduleIdle();
@@ -183,7 +204,7 @@ export function createGame({ mount, sdk, tweaks }) {
     if (!component) return;
     const next = [...state.buildOrder, componentId];
     store.setBuildOrder(next);
-    store.patch({ feedback: next.length === 1 ? `Interesting — kamu memprioritaskan ${component.label} lebih dulu.` : `${component.label} menambah sudut baru ke sistemmu.` });
+    store.patch({ feedback: next.length === 1 ? t("game.firstPriority", { label: component.label }) : t("game.addedAngle", { label: component.label }) });
     audio.place(next.length);
     render({ focus: false });
   }
@@ -192,7 +213,7 @@ export function createGame({ mount, sdk, tweaks }) {
     const state = store.get();
     if (state.screen !== "build") return;
     store.setBuildOrder(state.buildOrder.filter((id) => id !== componentId));
-    store.patch({ feedback: "Pilihan dilepas. Kamu bisa menyusun prioritas lain." });
+    store.patch({ feedback: t("game.removed") });
     audio.select();
     render({ focus: false });
   }
@@ -328,12 +349,13 @@ export function createGame({ mount, sdk, tweaks }) {
   function friendlyRecovery() {
     clearTimers();
     store.reset("attract");
-    notice = "Sesi sebelumnya sudah dibersihkan. Kamu bisa langsung mulai lagi.";
+    notice = t("notice.cleaned");
     render();
   }
 
   function handleAction(action, target) {
     if (action === "start") beginSession();
+    else if (action === "set-locale") applyLocale(target.dataset.locale);
     else if (action === "skip-nickname") beginRoundOne("");
     else if (action === "choose-option") chooseOption(target.dataset.optionId);
     else if (action === "add-component") addComponent(target.dataset.componentId);
@@ -415,6 +437,7 @@ export function createGame({ mount, sdk, tweaks }) {
   return {
     start() {
       mount.className = "booth-app";
+      applyLocale(locale, { silent: true });
       mount.addEventListener("click", onClick);
       mount.addEventListener("submit", onSubmit);
       mount.addEventListener("dragstart", onDragStart);
@@ -427,8 +450,11 @@ export function createGame({ mount, sdk, tweaks }) {
       if (globalThis.location.hash === "#operator") void openOperator();
       else render();
       void persistence.loadContent().then((loaded) => {
-        data = loaded;
-        if (store.get().screen === "attract") render({ focus: false });
+        remoteData = loaded;
+        if (locale === "id") {
+          data = loaded;
+          if (store.get().screen === "attract") render({ focus: false });
+        }
       });
     },
     destroy() {
